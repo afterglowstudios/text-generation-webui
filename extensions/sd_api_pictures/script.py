@@ -11,6 +11,9 @@ import requests
 import torch
 from modules.models import reload_model, unload_model
 from PIL import Image
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 torch._C._jit_set_profiling_mode(False)
 
@@ -139,8 +142,20 @@ def get_SD_pictures(description):
         "negative_prompt": params['negative_prompt']
     }
 
+
+    auth_string = os.getenv('AUTOMATIC1111_AUTH')
+    encoded_auth_string = base64.b64encode(auth_string.encode('utf-8')).decode('utf-8') 
+    headers = { 
+        'Content-Type': 'application/json', 
+        'Authorization': f'Basic {encoded_auth_string}'
+    }
+
+
+
+
+
     print(f'Prompting the image generator via the API on {params["address"]}...')
-    response = requests.post(url=f'{params["address"]}/sdapi/v1/txt2img', json=payload)
+    response = requests.post(url=f'{params["address"]}/sdapi/v1/txt2img', headers=headers,json=payload)
     response.raise_for_status()
     r = response.json()
 
